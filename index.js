@@ -55,7 +55,12 @@ let ccPluginPacker = {
     // projectRootPath 项目根目录
     // dontCopyFile 不拷贝的文件
     // dontMinJs  不压缩的JS代码
-    pack (projectRootPath, pluginDirName, dontCopyFile, dontMinJs) {
+    pack (options) {
+        let projectRootPath = options.project;
+        let pluginDirName = options.plugin;
+        let dontCopyFile = options.filterFiles;
+        let dontMinJs = options.dontMinJs;
+
         dontCopyFile = dontCopyFile === undefined ? [] : dontCopyFile;
         dontMinJs = dontMinJs === undefined ? [] : dontMinJs;
 
@@ -190,7 +195,7 @@ let ccPluginPacker = {
 
         // 压缩js
         let exclude = '!' + pluginTmpPath + '/node_modules/**/*';
-        let options = [
+        let globbyOptions = [
             pluginTmpPath + '/**/*.js',
             exclude,
         ];
@@ -198,13 +203,13 @@ let ccPluginPacker = {
             let item = dontMinJs[i];
             let fullUrl = Path.join(pluginTmpPath, item);
             if (Fs.existsSync(fullUrl)) {
-                options.push(`!${fullUrl}`);
+                globbyOptions.push(`!${fullUrl}`);
                 console.log('⚠️[压缩配置] 新增禁止压缩配置: ' + item);
             } else {
                 console.log('⚠️[压缩配置] 无效的禁止压缩配置: ' + item);
             }
         }
-        let paths = globby.sync(options);
+        let paths = globby.sync(globbyOptions);
         for (let i = 0; i < paths.length; i++) {
             let item = paths[i];
             let b = compressCode(item, false);
