@@ -1,0 +1,27 @@
+{
+  "name": "cocoscreatorpluginpacker",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tidys/CocosCreatorPluginPacker.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tidys/CocosCreatorPluginPacker/issues"
+  },
+  "homepage": "https://github.com/tidys/CocosCreatorPluginPacker#readme",
+  "dependencies": {
+    "fs-extra": "^8.1.0",
+    "globby": "2.1.0",
+    "gulp": "^4.0.2",
+    "html-minifier": "^4.0.0",
+    "jszip": "3.2.2",
+    "uglify-es": "^3.3.9"
+  }
+}

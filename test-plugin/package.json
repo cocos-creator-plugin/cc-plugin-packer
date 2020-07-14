@@ -1,0 +1,38 @@
+{
+  "name": "bitmap-font",
+  "version": "1.0.1",
+  "description": "bitmap font generate.",
+  "author": "xuyanfeng",
+  "main": "main.js",
+  "main-menu": {
+    "i18n:MAIN_MENU.package.title/i18n:bitmap-font.title/字体图集(IMAGE)": {
+      "message": "bitmap-font:openFNT"
+    },
+    "i18n:MAIN_MENU.package.title/i18n:bitmap-font.title/字体文件(TTF)": {
+      "message": "bitmap-font:openTTF"
+    }
+  },
+  "panel": {
+    "main": "panel/index.js",
+    "type": "dockable",
+    "title": "bitmap-font",
+    "width": 800,
+    "height": 580
+  },
+  "panel.ttf": {
+    "main": "panel-ttf/index.js",
+    "engineSupport": true,
+    "type": "dockable",
+    "title": "bitmap-ttf",
+    "width": 800,
+    "height": 580
+  },
+  "dependencies": {
+    "image-size": "^0.6.1",
+    "layout": "^2.2.0",
+    "opentype.js": "^1.1.0",
+    "spritesmith": "^3.1.1",
+    "uglify-es": "^3.1.8",
+    "uuid": "^7.0.2"
+  }
+}
