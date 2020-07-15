@@ -7,7 +7,7 @@ const globby = require('globby');
 const JsZip = require('jszip');
 
 let ccPluginPacker = {
-    compressCode (jsFile, isMin) {
+    _compressCode (jsFile, isMin) {
         if (Fs.existsSync(jsFile)) {
             let data = Fs.readFileSync(jsFile, 'utf-8');
             let result = UglifyES.minify(data, {
@@ -39,7 +39,7 @@ let ccPluginPacker = {
             return false;
         }
     },
-    packageDir (rootPath, zip) {
+    _packageDir (rootPath, zip) {
         let dir = Fs.readdirSync(rootPath);
         for (let i = 0; i < dir.length; i++) {
             let itemDir = dir[i];
@@ -48,7 +48,7 @@ let ccPluginPacker = {
             if (stat.isFile()) {
                 zip.file(itemDir, Fs.readFileSync(itemFullPath));
             } else if (stat.isDirectory()) {
-                packageDir(itemFullPath, zip.folder(itemDir));
+                ccPluginPacker._packageDir(itemFullPath, zip.folder(itemDir));
             }
         }
     },
@@ -56,51 +56,54 @@ let ccPluginPacker = {
     // dontCopyFile 不拷贝的文件
     // dontMinJs  不压缩的JS代码
     pack (options) {
-        let projectRootPath = options.project;
-        let pluginDirName = options.plugin;
         let dontCopyFile = options.filterFiles;
+        if (dontCopyFile && Array.isArray(dontCopyFile)) {
+        } else {
+            dontCopyFile = [];
+        }
+
         let dontMinJs = options.dontMinJs;
+        if (dontMinJs && Array.isArray(dontMinJs)) {
 
-        dontCopyFile = dontCopyFile === undefined ? [] : dontCopyFile;
-        dontMinJs = dontMinJs === undefined ? [] : dontMinJs;
-
-        let projectPackagePath = Path.join(projectRootPath, 'packages');// 项目插件根目录
-        let pluginOutPath = Path.join(projectRootPath, 'out');// 插件输出目录
-        let pluginTmpPath = Path.join(pluginOutPath, pluginDirName);// 插件输出目录
-        let packageDirPath = Path.join(projectPackagePath, pluginDirName);// 插件根目录
-
-        // 创建插件的输出目录
-        if (!Fs.existsSync(pluginOutPath)) {
-            FsExtra.mkdirsSync(pluginOutPath);
-        }
-        if (!Fs.existsSync(pluginTmpPath)) {
-            FsExtra.mkdirsSync(pluginTmpPath);
+        } else {
+            dontMinJs = [];
         }
 
-        // 将插件先拷贝到out/pluginTmp目录下
-        if (!Fs.existsSync(packageDirPath)) {
-            console.error('[ERROR] 没有发现插件目录: ' + packageDirPath);
+        if (!options.plugin || !Fs.existsSync(options.plugin)) {
+            console.error(`[ERROR] 插件目录无效: ${options.plugin}`);
             return;
         }
-        // 清空临时目录
+
+        let pluginDirName = Path.basename(options.plugin); // 插件名字
+        let packageDirPath = options.plugin;// 插件根目录
+        let pluginOutPath = options.out;// 插件输出目录
+        if (!pluginOutPath || pluginOutPath === '') {
+            pluginOutPath = Path.join(Path.dirname(pluginDirName), 'out');
+        }
+        let pluginTmpPath = Path.join(pluginOutPath, pluginDirName);// 插件输出目录
+
+        // 创建插件的输出目录
+        FsExtra.ensureDirSync(pluginOutPath);
+        FsExtra.ensureDirSync(pluginTmpPath);
         FsExtra.emptyDirSync(pluginTmpPath);
+
+
         // 补全路径
         let dontCopyFileArray = [];
-
-        dontCopyFile.map(function (item) {
+        dontCopyFile.map((item) => {
             let full = Path.join(packageDirPath, item);
-            let b = Fs.existsSync(full);
-            if (b) {
+            if (Fs.existsSync(full)) {
                 dontCopyFileArray.push(full);
             } else {
-                console.log('无效的过滤项: ' + item);
+                console.warn('无效的过滤项: ' + item);
             }
         });
 
 
         // 可以在第三个参数,过滤掉不需要拷贝的文件
         // filter <Function>: Function to filter copied files. Return true to include, false to exclude.
-        FsExtra.copySync(packageDirPath, pluginTmpPath, function (file, dest) {
+        // 将插件先拷贝到out/pluginTmp目录下
+        FsExtra.copySync(packageDirPath, pluginTmpPath, (file, dest) => {
             let isInclude = true;
             let state = Fs.statSync(file);
             if (state.isDirectory()) {
@@ -129,18 +132,15 @@ let ccPluginPacker = {
                         }
                     }
                 }
-            } else {
-                debugger;
             }
             if (!isInclude) {
                 if (Fs.statSync(file).isFile()) {
-                    console.log('⚠️[过滤] 文件: ' + file);
+                    console.log('⚠[过滤] 文件: ' + file);
                 } else if (Fs.statSync(file).isDirectory()) {
                     console.log('⚠[过滤] 目录: ' + file);
                 }
             }
             return isInclude;
-            // let relative = path.relative(file, packageDirPath);
         });
 
         console.log('✅[拷贝] 拷贝插件到输出目录成功: ' + pluginTmpPath);
@@ -204,15 +204,15 @@ let ccPluginPacker = {
             let fullUrl = Path.join(pluginTmpPath, item);
             if (Fs.existsSync(fullUrl)) {
                 globbyOptions.push(`!${fullUrl}`);
-                console.log('⚠️[压缩配置] 新增禁止压缩配置: ' + item);
+                console.log('⚠[压缩配置] 新增禁止压缩配置: ' + item);
             } else {
-                console.log('⚠️[压缩配置] 无效的禁止压缩配置: ' + item);
+                console.log('⚠[压缩配置] 无效的禁止压缩配置: ' + item);
             }
         }
         let paths = globby.sync(globbyOptions);
         for (let i = 0; i < paths.length; i++) {
             let item = paths[i];
-            let b = compressCode(item, false);
+            let b = ccPluginPacker._compressCode(item, false);
             if (b) {
                 console.log(`✅[压缩] 成功(JS)[${i + 1}/${paths.length}]: ${item}`);
             } else {
@@ -239,7 +239,7 @@ let ccPluginPacker = {
         }
         // 打包文件
         let zip = new JsZip();
-        packageDir(pluginTmpPath, zip.folder(pluginDirName));
+        ccPluginPacker._packageDir(pluginTmpPath, zip.folder(pluginDirName));
         let zipFilePath = Path.join(pluginOutPath, `${pluginDirName}.zip`);
         if (Fs.existsSync(zipFilePath)) {
             Fs.unlinkSync(zipFilePath);
@@ -254,17 +254,19 @@ let ccPluginPacker = {
             }
         })
             .pipe(Fs.createWriteStream(zipFilePath))
-            .on('finish', function () {
-                showFileInExplore(pluginOutPath);
+            .on('finish', () => {
                 console.log('✅[打包]成功!');
+                if (options.show) {
+                    ccPluginPacker._showFileInExplore(pluginOutPath);
+                }
             })
-            .on('error', function () {
+            .on('error', () => {
                 console.log('❌[打包]失败: ');
             });
     },
 
     // 在文件夹中展示打包文件
-    showFileInExplore (showPath) {
+    _showFileInExplore (showPath) {
         let exec = require('child_process').exec;
         let platform = require('os').platform();
         let cmd = null;
@@ -278,9 +280,9 @@ let ccPluginPacker = {
             exec(cmd, (error, stdout, stderr) => {
                 if (error) {
                     console.log(stderr);
-                    return;
+                } else {
+                    // console.log(stdout);
                 }
-                console.log(stdout);
             });
         }
     }
