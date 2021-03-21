@@ -5,6 +5,8 @@ const Path = require('path');
 const HtmlMinifier = require('html-minifier');
 const globby = require('globby');
 const JsZip = require('jszip');
+const PluginVersion2 = '2.x';
+const PluginVersion3 = '3.x';
 
 let ccPluginPacker = {
     _compressCode (jsFile, isMin) {
@@ -56,6 +58,11 @@ let ccPluginPacker = {
     // dontCopyFile 不拷贝的文件
     // dontMinJs  不压缩的JS代码
     pack (options) {
+        let { version } = options;
+        if (!version) {
+            version = PluginVersion2;
+        }
+
         let dontCopyFile = options.filterFiles;
         if (dontCopyFile && Array.isArray(dontCopyFile)) {
         } else {
@@ -163,7 +170,12 @@ let ccPluginPacker = {
         let cfgData = Fs.readFileSync(pluginTmpPackageCfgPath, 'utf-8');
         let json = JSON.parse(cfgData);
         // 删除无用的menu
-        let menus = json['main-menu'];
+        let menus = null;
+        if (version === PluginVersion2) {
+            menus = json['main-menu'];
+        } else if (version === PluginVersion3) {
+            // todo 有待完善
+        }
         if (menus) {
             for (let key in menus) {
                 let item = menus[key];

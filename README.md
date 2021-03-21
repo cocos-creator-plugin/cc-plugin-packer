@@ -21,6 +21,7 @@
 let Path = require('path');
 let pack = require('cc-plugin-packer');
 pack({
+    version: '3.x', // 插件版本：2.x / 3.x
     plugin: Path.join(__dirname, 'test-plugin'),
     // 过滤插件的文件，相对于plugin目录的相对路径
     filterFiles: [
