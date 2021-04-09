@@ -12,6 +12,7 @@
       "message": "bitmap-font:openTTF"
     }
   },
+  "dev": true,
   "panel": {
     "main": "panel/index.js",
     "type": "dockable",

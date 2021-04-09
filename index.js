@@ -198,6 +198,11 @@ let ccPluginPacker = {
             delete json['devDependencies'];
             console.log('✅[丢弃] 无用devDependencies');
         }
+        // 删除dev字段
+        if (json.hasOwnProperty('dev')) {
+            delete json['dev'];
+            console.log('✅[丢弃] 删除dev')
+        }
 
         let str = JSON.stringify(json);
         // str = jsBeautifully(str);// 格式化json
