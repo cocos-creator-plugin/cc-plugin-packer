@@ -1,10 +1,10 @@
 {
   "name": "cc-plugin-packer",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "node ./test.js"
+    "test": "node ./dist/test.js"
   },
   "repository": {
     "type": "git",
@@ -17,11 +17,16 @@
   },
   "homepage": "https://github.com/tidys/CocosCreatorPluginPacker#readme",
   "dependencies": {
+    "@types/fs-extra": "^9.0.13",
+    "@types/lodash": "^4.14.175",
+    "@types/node": "^16.11.0",
+    "@types/uglify-es": "^3.0.0",
     "fs-extra": "^8.1.0",
     "globby": "2.1.0",
     "gulp": "^4.0.2",
     "html-minifier": "^4.0.0",
     "jszip": "3.2.2",
+    "lodash": "^4.17.21",
     "uglify-es": "^3.3.9"
   }
 }

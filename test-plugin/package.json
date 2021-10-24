@@ -29,11 +29,9 @@
     "height": 580
   },
   "dependencies": {
-    "image-size": "^0.6.1",
-    "layout": "^2.2.0",
-    "opentype.js": "^1.1.0",
-    "spritesmith": "^3.1.1",
-    "uglify-es": "^3.1.8",
+    "@types/fs-extra": "^9.0.13"
+  },
+  "devDependencies": {
     "uuid": "^7.0.2"
   }
 }
