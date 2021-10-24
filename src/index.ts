@@ -91,7 +91,7 @@ class CCPluginPacker {
                 filterFiles = [options.filterFiles]
             }
         }
-        const defaultFilterFiles = ['package-lock.json', 'README.md']
+        const defaultFilterFiles = ['package-lock.json', 'README.md', '.idea', '.git', '.gitignore', '.vscode', '.eslintrc.js']
         filterFiles = filterFiles.concat(defaultFilterFiles)
         filterFiles = uniq(filterFiles);
         for (let i = 0; i < filterFiles.length;) {
@@ -156,7 +156,7 @@ class CCPluginPacker {
         this.compressHTMLCSS(this.outDir, this.unMinFiles);
 
         const packageJsonFile = Path.join(this.outDir, 'package.json');
-        this.modifyPackageJson(packageJsonFile, ['devDependencies', 'dev']);
+        this.modifyPackageJson(packageJsonFile, ['devDependencies', 'dev', "husky", "lint-staged", "scripts"]);
         this.reNpmInstall(this.outDir);// npm install，会删除devDependencies的依赖
         this.modifyPackageJson(packageJsonFile, ['dependencies'])
         const pluginName = Path.basename(this.pluginDir);
@@ -308,6 +308,13 @@ class CCPluginPacker {
                 }
             }
         )
+        filterFiles.forEach(item => {
+            const fullUrl = Path.join(destDir, item);
+            if (FsExtra.existsSync(fullUrl) &&
+                Fs.statSync(fullUrl).isDirectory()) {
+                FsExtra.removeSync(fullUrl);
+            }
+        })
         console.log('✅[拷贝] 拷贝插件到输出目录成功: ' + destDir);
     }
 
@@ -356,7 +363,7 @@ class CCPluginPacker {
     }
 }
 
-export default function (opts: PackOptions) {
+export function pack(opts: PackOptions) {
     const packer = new CCPluginPacker();
     packer.pack(opts)
-};
+}

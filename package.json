@@ -1,11 +1,13 @@
 {
   "name": "cc-plugin-packer",
   "version": "1.1.0",
-  "description": "",
-  "main": "index.js",
+  "description": "cocos creator 插件打包工具",
+  "main": "dist/index.js",
   "scripts": {
-    "test": "node ./dist/test.js"
+    "test": "node ./dist/test.js",
+    "build": "rm -rf dist/ && tsc"
   },
+  "typings": "./dist/index.d.ts",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/tidys/CocosCreatorPluginPacker.git"

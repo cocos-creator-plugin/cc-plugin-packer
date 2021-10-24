@@ -1,4 +1,4 @@
-import pack from './index'
+import { pack } from './index'
 import * as Path from 'path'
 
 pack({
