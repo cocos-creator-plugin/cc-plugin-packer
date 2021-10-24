@@ -3,6 +3,7 @@
 - 压缩混淆js
 - 压缩html,css
 - 针对插件的package.json目录会自动做一些剔除工作
+
 ```
 {
     "main-menu":{
@@ -16,10 +17,11 @@
 ```
 
 使用示例
+
 ```js
 
-let Path = require('path');
-let pack = require('cc-plugin-packer');
+const Path = require('path');
+const { pack } = require('cc-plugin-packer');
 pack({
     version: '3.x', // 插件版本：2.x / 3.x
     plugin: Path.join(__dirname, 'test-plugin'),
@@ -29,14 +31,16 @@ pack({
         'readme.js' // 无效的文件
     ],
     // 不压缩的JS代码
-    dontMinJs: [
+    unMinFiles: [
         'panel/index.js',
         'panel/item.js' // 不存在的文件
-    ], 
-    // 默认的插件打包文件存放位置，默认在project/out
+    ],
+    // 默认的插件打包文件存放位置，默认和插件目录同级
     out: Path.join(__dirname, 'out'),
     // 打包完毕后是否在文件夹中显示 
     show: true,
+    // 是否删除临时产生的打包目录
+    cleanOut: true,
 });
 
 ```
