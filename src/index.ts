@@ -23,6 +23,7 @@ interface PackOptions {
     out?: string,// 插件输出目录，默认插件目录的同级
     plugin: string,// 插件的目录
     show: boolean;
+    needNpmInstall?: boolean;// 是否需要 npm install，有些插件没有使用任何npm模块就不需要了
     cleanOut?: boolean; // 是否清理out目录
 }
 
@@ -74,8 +75,8 @@ class CCPluginPacker {
         }
     }
 
-    private unMinFiles: string  [] = [];
-    private filterFiles: string  [] = [];
+    private unMinFiles: string[] = [];
+    private filterFiles: string[] = [];
     private version: string | null = null;
     private pluginDir: string | null = null;
     private outDir: string | null = null;
@@ -138,6 +139,8 @@ class CCPluginPacker {
     }
 
     pack(options: PackOptions) {
+        const { needNpmInstall } = options;
+
         // 参数解析
         this.version = options.version || PluginVersion2;
         this.show = options.show;
@@ -157,7 +160,10 @@ class CCPluginPacker {
 
         const packageJsonFile = Path.join(this.outDir, 'package.json');
         this.modifyPackageJson(packageJsonFile, ['devDependencies', 'dev', "husky", "lint-staged", "scripts"]);
-        this.reNpmInstall(this.outDir);// npm install，会删除devDependencies的依赖
+
+        if (needNpmInstall === undefined || needNpmInstall === true) {
+            this.reNpmInstall(this.outDir);// npm install，会删除devDependencies的依赖
+        }
         this.modifyPackageJson(packageJsonFile, ['dependencies'])
         const pluginName = Path.basename(this.pluginDir);
         this.zipDir(this.outDir, pluginName);
@@ -261,52 +267,52 @@ class CCPluginPacker {
     }
 
     private copySourceToPackDir(sourceDir: string, destDir: string, filterFiles: string[] = []) {
-        let dontCopyFileArray: string[] = [];
+        let notCopyFileArray: string[] = [];
         filterFiles.forEach(item => {
             const fullUrl = Path.join(sourceDir, item);
             if (Fs.existsSync(fullUrl)) {
-                dontCopyFileArray.push(fullUrl)
+                notCopyFileArray.push(fullUrl)
             }
         })
 
         FsExtra.copySync(sourceDir, destDir, {
-                // filter <Function>: Function to filter copied files. Return true to include, false to exclude.
-                filter: (file: string, dest: string) => {
-                    let isInclude = true;
-                    let state = Fs.statSync(file);
-                    if (state.isDirectory()) {
-                        // 文件夹,判断是否有这个文件夹
-                        isInclude = !dontCopyFileArray.find(itemFile => {
-                            return Fs.statSync(itemFile).isDirectory() && itemFile === file
-                        })
-                    } else if (state.isFile()) {
-                        // 文件 判断是否包含在文件夹内
-                        for (let i = 0; i < dontCopyFileArray.length; i++) {
-                            let itemFile = dontCopyFileArray[i];
-                            if (Fs.statSync(itemFile).isDirectory()) {
-                                if (file.indexOf(itemFile) === -1) {
-                                } else {
-                                    isInclude = false;
-                                    break;
-                                }
-                            } else if (Fs.statSync(itemFile).isFile()) {
-                                if (itemFile === file) {
-                                    isInclude = false;
-                                    break;
-                                }
+            // filter <Function>: Function to filter copied files. Return true to include, false to exclude.
+            filter: (file: string, dest: string) => {
+                let isInclude = true;
+                let state = Fs.statSync(file);
+                if (state.isDirectory()) {
+                    // 文件夹,判断是否有这个文件夹
+                    isInclude = !notCopyFileArray.find(itemFile => {
+                        return Fs.statSync(itemFile).isDirectory() && itemFile === file
+                    })
+                } else if (state.isFile()) {
+                    // 文件 判断是否包含在文件夹内
+                    for (let i = 0; i < notCopyFileArray.length; i++) {
+                        let itemFile = notCopyFileArray[i];
+                        if (Fs.statSync(itemFile).isDirectory()) {
+                            if (file.indexOf(itemFile) === -1) {
+                            } else {
+                                isInclude = false;
+                                break;
+                            }
+                        } else if (Fs.statSync(itemFile).isFile()) {
+                            if (itemFile === file) {
+                                isInclude = false;
+                                break;
                             }
                         }
                     }
-                    if (!isInclude) {
-                        if (Fs.statSync(file).isFile()) {
-                            console.log('⚠[过滤] 文件: ' + file);
-                        } else if (Fs.statSync(file).isDirectory()) {
-                            console.log('⚠[过滤] 目录: ' + file);
-                        }
-                    }
-                    return isInclude;
                 }
+                if (!isInclude) {
+                    if (Fs.statSync(file).isFile()) {
+                        console.log('⚠[过滤] 文件: ' + file);
+                    } else if (Fs.statSync(file).isDirectory()) {
+                        console.log('⚠[过滤] 目录: ' + file);
+                    }
+                }
+                return isInclude;
             }
+        }
         )
         filterFiles.forEach(item => {
             const fullUrl = Path.join(destDir, item);
