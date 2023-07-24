@@ -5,6 +5,7 @@ interface PackOptions {
     out?: string;
     plugin: string;
     show: boolean;
+    needNpmInstall?: boolean;
     cleanOut?: boolean;
 }
 export declare function pack(opts: PackOptions): void;

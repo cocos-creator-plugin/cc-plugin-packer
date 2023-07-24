@@ -1,7 +1,11 @@
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -160,13 +164,14 @@ var CCPluginPacker = /** @class */ (function () {
         return outDir;
     };
     CCPluginPacker.prototype.pack = function (options) {
+        var needNpmInstall = options.needNpmInstall;
         // 参数解析
         this.version = options.version || PluginVersion2;
         this.show = options.show;
         this.cleanOut = !!options.cleanOut;
         this.pluginDir = options.plugin || null;
         if (!this.pluginDir || !Fs.existsSync(this.pluginDir)) {
-            console.error("[ERROR] \u63D2\u4EF6\u76EE\u5F55\u65E0\u6548: " + options.plugin);
+            console.error("[ERROR] \u63D2\u4EF6\u76EE\u5F55\u65E0\u6548: ".concat(options.plugin));
             return;
         }
         this.unMinFiles = this.initUnMinFiles(options);
@@ -177,7 +182,9 @@ var CCPluginPacker = /** @class */ (function () {
         this.compressHTMLCSS(this.outDir, this.unMinFiles);
         var packageJsonFile = Path.join(this.outDir, 'package.json');
         this.modifyPackageJson(packageJsonFile, ['devDependencies', 'dev', "husky", "lint-staged", "scripts"]);
-        this.reNpmInstall(this.outDir); // npm install，会删除devDependencies的依赖
+        if (needNpmInstall === undefined || needNpmInstall === true) {
+            this.reNpmInstall(this.outDir); // npm install，会删除devDependencies的依赖
+        }
         this.modifyPackageJson(packageJsonFile, ['dependencies']);
         var pluginName = Path.basename(this.pluginDir);
         this.zipDir(this.outDir, pluginName);
@@ -204,7 +211,7 @@ var CCPluginPacker = /** @class */ (function () {
         if (!Fs.existsSync(dirParent)) {
             dirParent = dir;
         }
-        var zipFilePath = Path.join(dirParent, pluginName + ".zip");
+        var zipFilePath = Path.join(dirParent, "".concat(pluginName, ".zip"));
         if (Fs.existsSync(zipFilePath)) {
             Fs.unlinkSync(zipFilePath);
             console.log('⚠[删除] 旧版本压缩包: ' + zipFilePath);
@@ -230,13 +237,13 @@ var CCPluginPacker = /** @class */ (function () {
     CCPluginPacker.prototype.compressHTMLCSS = function (dir, unMinFiles) {
         if (unMinFiles === void 0) { unMinFiles = []; }
         var opts = [
-            dir + "/**/*.{html,css}",
-            "!" + dir + "/node_modules/**/*",
+            "".concat(dir, "/**/*.{html,css}"),
+            "!".concat(dir, "/node_modules/**/*"),
         ];
         unMinFiles.forEach(function (item) {
             var ext = Path.extname(item);
             if (ext === '.html' || ext === '.css') {
-                opts.push("!" + Path.join(dir, item));
+                opts.push("!".concat(Path.join(dir, item)));
             }
         });
         var paths = globby.sync(opts);
@@ -251,19 +258,19 @@ var CCPluginPacker = /** @class */ (function () {
                 minifyCSS: false, //是否压缩html里的css（使用clean-css进行的压缩）
             });
             Fs.writeFileSync(item, minifyData);
-            console.log("\u2705[\u538B\u7F29] \u6210\u529F(HTML)[" + (i + 1) + "/" + paths.length + "]: " + item);
+            console.log("\u2705[\u538B\u7F29] \u6210\u529F(HTML)[".concat(i + 1, "/").concat(paths.length, "]: ").concat(item));
         }
     };
     CCPluginPacker.prototype.compressJs = function (dir, unMinFiles) {
         if (unMinFiles === void 0) { unMinFiles = []; }
         var opts = [
-            dir + "/**/*.js",
-            "!" + dir + "/node_modules/**/*",
+            "".concat(dir, "/**/*.js"),
+            "!".concat(dir, "/node_modules/**/*"),
         ];
         unMinFiles.forEach(function (item) {
             var ext = Path.extname(item);
             if (ext === '.js') {
-                opts.push("!" + Path.join(dir, item));
+                opts.push("!".concat(Path.join(dir, item)));
             }
         });
         var paths = globby.sync(opts);
@@ -271,20 +278,20 @@ var CCPluginPacker = /** @class */ (function () {
             var item = paths[i];
             var b = this._compressCode(item, false);
             if (b) {
-                console.log("\u2705[\u538B\u7F29] \u6210\u529F(JS)[" + (i + 1) + "/" + paths.length + "]: " + item);
+                console.log("\u2705[\u538B\u7F29] \u6210\u529F(JS)[".concat(i + 1, "/").concat(paths.length, "]: ").concat(item));
             }
             else {
-                console.log("\u274E[\u538B\u7F29] \u5931\u8D25(JS)[" + (i + 1) + "/" + paths.length + "]: " + item);
+                console.log("\u274E[\u538B\u7F29] \u5931\u8D25(JS)[".concat(i + 1, "/").concat(paths.length, "]: ").concat(item));
             }
         }
     };
     CCPluginPacker.prototype.copySourceToPackDir = function (sourceDir, destDir, filterFiles) {
         if (filterFiles === void 0) { filterFiles = []; }
-        var dontCopyFileArray = [];
+        var notCopyFileArray = [];
         filterFiles.forEach(function (item) {
             var fullUrl = Path.join(sourceDir, item);
             if (Fs.existsSync(fullUrl)) {
-                dontCopyFileArray.push(fullUrl);
+                notCopyFileArray.push(fullUrl);
             }
         });
         FsExtra.copySync(sourceDir, destDir, {
@@ -294,14 +301,14 @@ var CCPluginPacker = /** @class */ (function () {
                 var state = Fs.statSync(file);
                 if (state.isDirectory()) {
                     // 文件夹,判断是否有这个文件夹
-                    isInclude = !dontCopyFileArray.find(function (itemFile) {
+                    isInclude = !notCopyFileArray.find(function (itemFile) {
                         return Fs.statSync(itemFile).isDirectory() && itemFile === file;
                     });
                 }
                 else if (state.isFile()) {
                     // 文件 判断是否包含在文件夹内
-                    for (var i = 0; i < dontCopyFileArray.length; i++) {
-                        var itemFile = dontCopyFileArray[i];
+                    for (var i = 0; i < notCopyFileArray.length; i++) {
+                        var itemFile = notCopyFileArray[i];
                         if (Fs.statSync(itemFile).isDirectory()) {
                             if (file.indexOf(itemFile) === -1) {
                             }
@@ -342,7 +349,7 @@ var CCPluginPacker = /** @class */ (function () {
         keys.forEach(function (key) {
             if (json.hasOwnProperty(key)) {
                 delete json[key];
-                console.log("\u2705[\u4E22\u5F03] \u65E0\u7528" + key);
+                console.log("\u2705[\u4E22\u5F03] \u65E0\u7528".concat(key));
             }
         });
     };
@@ -389,3 +396,4 @@ function pack(opts) {
     packer.pack(opts);
 }
 exports.pack = pack;
+//# sourceMappingURL=index.js.map
