@@ -1,34 +1,34 @@
 {
-  "name": "cc-plugin-packer",
-  "version": "1.1.0",
-  "description": "cocos creator 插件打包工具",
-  "main": "dist/index.js",
-  "scripts": {
-    "test": "node ./dist/test.js",
-    "build": "rm -rf dist/ && tsc"
-  },
-  "typings": "./dist/index.d.ts",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/tidys/CocosCreatorPluginPacker.git"
-  },
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/tidys/CocosCreatorPluginPacker/issues"
-  },
-  "homepage": "https://github.com/tidys/CocosCreatorPluginPacker#readme",
-  "dependencies": {
-    "@types/fs-extra": "^9.0.13",
-    "@types/lodash": "^4.14.175",
-    "@types/node": "^16.11.0",
-    "@types/uglify-es": "^3.0.0",
-    "fs-extra": "^8.1.0",
-    "globby": "2.1.0",
-    "gulp": "^4.0.2",
-    "html-minifier": "^4.0.0",
-    "jszip": "3.7.0",
-    "lodash": "^4.17.21",
-    "uglify-es": "^3.3.9"
-  }
+    "name": "cc-plugin-packer",
+    "version": "1.1.1",
+    "description": "cocos creator 插件打包工具",
+    "main": "dist/index.js",
+    "scripts": {
+        "test": "node ./dist/test.js",
+        "build": "rm -rf dist/ && tsc"
+    },
+    "typings": "./dist/index.d.ts",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/tidys/CocosCreatorPluginPacker.git"
+    },
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/tidys/CocosCreatorPluginPacker/issues"
+    },
+    "homepage": "https://github.com/tidys/CocosCreatorPluginPacker#readme",
+    "dependencies": {
+        "@types/fs-extra": "^9.0.13",
+        "@types/lodash": "^4.14.175",
+        "@types/node": "^16.11.0",
+        "@types/uglify-es": "^3.0.0",
+        "fs-extra": "^8.1.0",
+        "globby": "2.1.0",
+        "gulp": "^4.0.2",
+        "html-minifier": "^4.0.0",
+        "jszip": "3.7.0",
+        "lodash": "^4.17.21",
+        "uglify-es": "^3.3.9"
+    }
 }
