@@ -35,6 +35,7 @@ pack({
         'panel/index.js',
         'panel/item.js' // 不存在的文件
     ],
+    dropConsole: true, // 是否丢弃Console的代码，默认为true
     needNpmInstall:true, // 是否需要 npm install，有些插件没有使用任何npm模块就不需要了
     // 默认的插件打包文件存放位置，默认和插件目录同级
     out: Path.join(__dirname, 'out'),

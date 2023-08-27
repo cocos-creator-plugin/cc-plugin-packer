@@ -1,6 +1,6 @@
 {
     "name": "cc-plugin-packer",
-    "version": "1.1.1",
+    "version": "1.1.2",
     "description": "cocos creator 插件打包工具",
     "main": "dist/index.js",
     "scripts": {

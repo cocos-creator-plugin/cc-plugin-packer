@@ -23,6 +23,7 @@ interface PackOptions {
     out?: string,// 插件输出目录，默认插件目录的同级
     plugin: string,// 插件的目录
     show: boolean;
+    dropConsole?: boolean; // 丢弃Console，默认为true
     needNpmInstall?: boolean;// 是否需要 npm install，有些插件没有使用任何npm模块就不需要了
     cleanOut?: boolean; // 是否清理out目录
 }
@@ -31,10 +32,14 @@ class CCPluginPacker {
     _compressCode(jsFile: string, isMin: boolean) {
         if (Fs.existsSync(jsFile)) {
             let data = Fs.readFileSync(jsFile, 'utf-8');
+            let drop_console = true;
+            if (this._options && this._options['dropConsole'] == false) {
+                drop_console = false;
+            }
             let result = UglifyES.minify(data, {
                 compress: {
                     dead_code: true,// 移除未使用的code
-                    drop_console: true,//丢弃console代码,默认false
+                    drop_console,//丢弃console代码
                     drop_debugger: true,//丢弃debugger代码,默认true
                 },
                 output: {
@@ -137,8 +142,9 @@ class CCPluginPacker {
         FsExtra.emptyDirSync(outDir);
         return outDir;
     }
-
+    private _options: PackOptions | null = null;
     pack(options: PackOptions) {
+        this._options = options;
         const { needNpmInstall } = options;
 
         // 参数解析
