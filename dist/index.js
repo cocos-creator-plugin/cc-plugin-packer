@@ -51,14 +51,19 @@ var CCPluginPacker = /** @class */ (function () {
         this.outDir = null;
         this.show = false;
         this.cleanOut = false;
+        this._options = null;
     }
     CCPluginPacker.prototype._compressCode = function (jsFile, isMin) {
         if (Fs.existsSync(jsFile)) {
             var data = Fs.readFileSync(jsFile, 'utf-8');
+            var drop_console = true;
+            if (this._options && this._options['dropConsole'] == false) {
+                drop_console = false;
+            }
             var result = UglifyES.minify(data, {
                 compress: {
                     dead_code: true,
-                    drop_console: true,
+                    drop_console: drop_console,
                     drop_debugger: true, //丢弃debugger代码,默认true
                 },
                 output: {
@@ -164,6 +169,7 @@ var CCPluginPacker = /** @class */ (function () {
         return outDir;
     };
     CCPluginPacker.prototype.pack = function (options) {
+        this._options = options;
         var needNpmInstall = options.needNpmInstall;
         // 参数解析
         this.version = options.version || PluginVersion2;

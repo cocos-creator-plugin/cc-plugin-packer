@@ -5,6 +5,7 @@ interface PackOptions {
     out?: string;
     plugin: string;
     show: boolean;
+    dropConsole?: boolean;
     needNpmInstall?: boolean;
     cleanOut?: boolean;
 }
