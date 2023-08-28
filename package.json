@@ -27,7 +27,7 @@
         "globby": "2.1.0",
         "gulp": "^4.0.2",
         "html-minifier": "^4.0.0",
-        "jszip": "3.7.0",
+        "jszip": "3.8.0",
         "lodash": "^4.17.21",
         "uglify-es": "^3.3.9"
     }
